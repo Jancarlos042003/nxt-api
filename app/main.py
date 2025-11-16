@@ -7,5 +7,11 @@ from app.routers.cases import cases_router
 app = FastAPI()
 register_handlers(app)
 
+
+@app.get("/")
+async def root():
+    return {"message": "Bienvenido a la API de Gestión de Casos"}
+
+
 app.include_router(router=cases_router, prefix="/cases")
 app.include_router(router=auth_router, prefix="/auth")
