@@ -10,7 +10,7 @@ app = FastAPI()
 # Configuración de CORS
 origins = [
     "http://localhost:3000",
-    # Agregar el dominio del frontend de producción
+    "https://nxt-legaltech.vercel.app"
 ]
 
 app.add_middleware(
