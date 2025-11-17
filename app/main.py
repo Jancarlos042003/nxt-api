@@ -1,10 +1,27 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.exceptions.handler import register_handlers
 from app.routers.auth import auth_router
 from app.routers.cases import cases_router
 
 app = FastAPI()
+
+# Configuración de CORS
+origins = [
+    "http://localhost:3000",
+    # Agregar el dominio del frontend de producción
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Registro de manejadores de excepciones personalizados
 register_handlers(app)
 
 
