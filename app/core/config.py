@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     CASES_TABLE: str
     USERS_TABLE: str
     SECRET_KEY: str
+    APP_ENV: str = "production"
 
     class Config:
         env_file = str(BASE_DIR / ".env")

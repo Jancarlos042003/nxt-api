@@ -1,12 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import APIRouter, Depends, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
-from app.core.security import create_access_token
-from app.core.security import get_current_user
+from app.core.security import create_access_token, get_current_user
+from app.core.config import  settings
 from app.di.user_provider import get_user_service
 from app.exceptions.domain_exceptions import InvalidCredentialsException
 
@@ -15,7 +14,8 @@ pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
 @auth_router.post("/login")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], user_service=Depends(get_user_service)):
+async def login(response: Response, form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+                user_service=Depends(get_user_service)):
     username = form_data.username
     password = form_data.password
 
@@ -32,9 +32,26 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], user
         "name": user["name"],
     }
 
-    access_token = create_access_token(data)
+    token = create_access_token(data)
 
-    return {"token": access_token, "user": {"username": user["username"], "name": user["name"]}}
+    secure_cookie = True
+    samesite_policy = "none"
+
+    if settings.APP_ENV == "development":
+        secure_cookie = False
+        samesite_policy = "lax"
+
+    response.set_cookie(
+        key="token",
+        value=token,
+        httponly=True,
+        secure=secure_cookie,
+        samesite=samesite_policy,
+        max_age=60 * 60 * 24 * 7,  # 7 días
+        path="/",
+    )
+
+    return {"token": token, "user": {"username": user["username"], "name": user["name"]}}
 
 
 @auth_router.get("/me")
