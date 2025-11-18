@@ -7,8 +7,8 @@ from pydantic import BaseModel, Field
 
 class CaseStatus(str, Enum):
     NUEVO = "nuevo"
-    EN_PROGRESO = "en progreso"
-    PENDIENTE = "pendiente"
+    PENDIENTE = "en progreso"
+    FINALIZADO = "finalizado"
 
 
 class CaseCreateRequest(BaseModel):
