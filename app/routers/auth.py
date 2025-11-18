@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
+from app.core.config import settings
 from app.core.security import create_access_token, get_current_user
-from app.core.config import  settings
 from app.di.user_provider import get_user_service
 from app.exceptions.domain_exceptions import InvalidCredentialsException
 
@@ -57,3 +57,27 @@ async def login(response: Response, form_data: Annotated[OAuth2PasswordRequestFo
 @auth_router.get("/me")
 def get_profile(user: Annotated[dict, Depends(get_current_user)]):
     return {"username": user["username"], "name": user["name"]}
+
+
+@auth_router.post("/logout")
+async def logout(response: Response):
+    secure_cookie = True
+    samesite_policy = "none"
+
+    # Mismos valores que en login para evitar inconsistencias
+    if settings.APP_ENV == "development":
+        secure_cookie = False
+        samesite_policy = "lax"
+
+    # 🔥 Borrar cookie al enviarla con max_age=0
+    response.set_cookie(
+        key="token",
+        value="",
+        httponly=True,
+        secure=secure_cookie,
+        samesite=samesite_policy,
+        max_age=0,  # 👈 La borra instantáneamente
+        path="/",
+    )
+
+    return {"message": "Sesión cerrada correctamente"}
