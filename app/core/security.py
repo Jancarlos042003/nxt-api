@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, UTC
 from typing import Optional, Annotated
 
-from fastapi import Depends
+from fastapi import Depends, Cookie
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
@@ -37,7 +37,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 # DEPENDENCIAS DE FASTAPI
-def get_current_user(token: Annotated[str, Depends(oauth2_schema)], user_service=Depends(get_user_service)):
+def get_current_user(token: Annotated[str, Cookie(None)], user_service=Depends(get_user_service)):
     """Obtiene el usuario actual a partir del token JWT."""
     try:
         # Decodificamos el token
