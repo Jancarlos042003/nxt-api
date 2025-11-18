@@ -51,6 +51,9 @@ async def login(response: Response, form_data: Annotated[OAuth2PasswordRequestFo
         path="/",
     )
 
+    # Permitir que el frontend acceda a la cookie
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+
     return {"token": token, "user": {"username": user["username"], "name": user["name"]}}
 
 
@@ -64,20 +67,21 @@ async def logout(response: Response):
     secure_cookie = True
     samesite_policy = "none"
 
-    # Mismos valores que en login para evitar inconsistencias
     if settings.APP_ENV == "development":
         secure_cookie = False
         samesite_policy = "lax"
 
-    # 🔥 Borrar cookie al enviarla con max_age=0
+    # Eliminar la cookie del token
     response.set_cookie(
         key="token",
         value="",
         httponly=True,
         secure=secure_cookie,
         samesite=samesite_policy,
-        max_age=0,  # 👈 La borra instantáneamente
+        max_age=0,
         path="/",
     )
+
+    response.headers["Access-Control-Allow-Credentials"] = "true"
 
     return {"message": "Sesión cerrada correctamente"}
