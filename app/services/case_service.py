@@ -27,13 +27,17 @@ class CaseService:
             save_dict = case_data.model_dump()
             save_dict["id"] = case_id
 
+            # DynamoDB requiere que las fechas sean strings en formato ISO 8601
+            save_dict["created_at"] = save_dict["created_at"].isoformat()
+
             self.case_repository.create_case(save_dict)
 
             return CaseResponse(
                 id=case_id,
                 name=case_data.name,
                 description=case_data.description,
-                status=case_data.status
+                status=case_data.status,
+                created_at=case_data.created_at
             )
         except DatabaseException as e:
             logger.error(f"Error al crear el caso: {e}")
