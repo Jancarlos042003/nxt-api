@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 
 from app.core.security import get_current_user
 from app.di.case_providers import get_case_service
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 cases_router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
-@cases_router.post("/create")
+@cases_router.post("/create", status_code=status.HTTP_201_CREATED)
 def create_case(case: CaseCreateRequest, service: CaseService = Depends(get_case_service)):
     return service.create_case(case)
 
@@ -27,7 +27,7 @@ def update_case(case_id: str, case: CaseUpdateRequest, service: CaseService = De
     return service.update_case(case_id, case)
 
 
-@cases_router.get("/")
+@cases_router.get("")
 def list_cases(service: CaseService = Depends(get_case_service)):
     return service.list_cases()
 
