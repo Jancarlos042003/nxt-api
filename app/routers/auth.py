@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
-from app.core.config import settings
 from app.core.security import create_access_token, get_current_user
 from app.di.user_provider import get_user_service
 from app.exceptions.domain_exceptions import InvalidCredentialsException
@@ -34,54 +33,9 @@ async def login(response: Response, form_data: Annotated[OAuth2PasswordRequestFo
 
     token = create_access_token(data)
 
-    secure_cookie = True
-    samesite_policy = "none"
-
-    if settings.APP_ENV == "development":
-        secure_cookie = False
-        samesite_policy = "lax"
-
-    response.set_cookie(
-        key="token",
-        value=token,
-        httponly=True,
-        secure=secure_cookie,
-        samesite=samesite_policy,
-        max_age=60 * 60 * 24 * 7,  # 7 días
-        path="/",
-    )
-
-    # Permitir que el frontend acceda a la cookie
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-
     return {"token": token, "user": {"username": user["username"], "name": user["name"]}}
 
 
 @auth_router.get("/me")
 def get_profile(user: Annotated[dict, Depends(get_current_user)]):
     return {"username": user["username"], "name": user["name"]}
-
-
-@auth_router.post("/logout")
-async def logout(response: Response):
-    secure_cookie = True
-    samesite_policy = "none"
-
-    if settings.APP_ENV == "development":
-        secure_cookie = False
-        samesite_policy = "lax"
-
-    # Eliminar la cookie del token
-    response.set_cookie(
-        key="token",
-        value="",
-        httponly=True,
-        secure=secure_cookie,
-        samesite=samesite_policy,
-        max_age=0,
-        path="/",
-    )
-
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-
-    return {"message": "Sesión cerrada correctamente"}
