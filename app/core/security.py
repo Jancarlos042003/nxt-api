@@ -37,7 +37,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 # DEPENDENCIAS DE FASTAPI
-def get_current_user(token: Annotated[str, Cookie(None)], user_service=Depends(get_user_service)):
+def get_current_user(token: Annotated[str | None, Cookie()] = None, user_service=Depends(get_user_service)):
     """Obtiene el usuario actual a partir del token JWT."""
     try:
         # Decodificamos el token
